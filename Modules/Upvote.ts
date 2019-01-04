@@ -1,6 +1,6 @@
 import { Member } from 'eris';
 import { Request } from 'express';
-import { bot, getSuperb, config } from './';
+import { bot, Reminder, getSuperb, config } from './';
 
 /**
  * Handles everything related to upvotes.

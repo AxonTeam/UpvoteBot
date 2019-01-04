@@ -1,7 +1,7 @@
 {
-  "name": "moustacheos",
-  "version": "3.0 (ruby)",
-  "description": "",
+  "name": "upvotebot",
+  "version": "1",
+  "description": "Give your Discord members rewards for voting for your bot on Discord Bot List",
   "main": "master.ts",
   "scripts": {
     "compile": "tsc",
