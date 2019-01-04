@@ -22,10 +22,12 @@ bot.on('error', (e: Error) => {
 
 commands.forEach((element) => {
     const command = bot.registerCommand(element.label, element.execute, element.options);
+    console.log(`[startup] Command registered: ${element.label}`);
 
     if (element.subcommands) {
         element.subcommands.forEach((subcommand) => {
             command.registerSubcommand(subcommand.label, subcommand.execute, subcommand.options);
+            console.log(`[startup] Subcommand registered: ${element.label} ${subcommand.label}`);
         })
     }
 });

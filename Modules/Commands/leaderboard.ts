@@ -6,11 +6,14 @@ export const leaderboard: MoustacheCommand = {
     execute: async (msg) => {
         const data = await PointsModel.find({}).sort('-points').limit(10);
         const fields: Object[] = [];
-        const ease = bot.guilds.get('365236789855649814');
-        
+        const guild = bot.guilds.get((msg as any).channel.guild);
+
+        if (!guild) {
+            return 'This command needs to be used in a guild.';
+        }
 
         data.forEach((element: any, index) => {
-            const member = ease!.members.find((u: any) => u.id === element.userID);
+            const member = guild.members.find((u: any) => u.id === element.userID);
 
             if (!member) {
                 fields.push({
@@ -27,7 +30,7 @@ export const leaderboard: MoustacheCommand = {
 
         const embed = {
             embed: {
-                color: config.embedColor,
+                color: 0x7289da,
                 fields: fields
             }
         }

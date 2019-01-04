@@ -24,7 +24,7 @@ export const evalCmd: MoustacheCommand = {
             }
     
             // Just in case.
-            evaled = evaled.split(bot.token).join('[The amount of facial hair covering this part of the message is not allowing you to read it.]');
+            evaled = evaled.split(bot.token).join('[A weird crystal pattern covering this part of the message is not allowing you to read it.]');
     
             const charlength = evaled.length;
     
@@ -57,7 +57,7 @@ export const evalCmd: MoustacheCommand = {
     label: 'eval',
     options: {
         description: 'Eval JS code.',
-        fullDescription: '[A weird amount of facial hair is covering this part of the message, you can\'t decipher what it reads.]',
+        fullDescription: '[A weird crystal pattern is covering this part of the message, you can\'t decipher what it reads.]',
         usage: '',
         requirements: {
             userIDs: ['249880389160665089']

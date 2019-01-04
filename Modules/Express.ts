@@ -5,7 +5,7 @@ import { Upvote, config } from './';
 export const app = express();
 app.use(bodyParser.json());
 
-app.post('/upvote', async (req: Request, res: Response) => {
+app.post('/upvote/:botID', async (req: Request, res: Response) => {
     // Abort if wrong authorization header
     if (config.authorization.length > 0 && req.headers.authorization !== config.authorization) {
         return console.log('[express] A request to /upvote arrived with the wrong authorization header...\n' + req.headers.authorization);

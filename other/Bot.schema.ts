@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 const pointsSchema = new Schema({
     botID: String, // ID of the bot attached to /upvote/:botid
     guildID: String, // Associated Guild
+    authentication: String, // Required authentication string that incoming requests must have.
     upvoteMessage: String, // A custom upvote message if any (still needs to be figured out)
     pointName: String // Custom points name
 });
