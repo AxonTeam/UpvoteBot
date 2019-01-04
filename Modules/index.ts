@@ -4,4 +4,3 @@ export * from './Bot';
 export * from './Points';
 export * from './Reminder';
 export * from './Express';
-export * from '../config'; // This is sorta an outcast, but should make configuration in modules easier in the future

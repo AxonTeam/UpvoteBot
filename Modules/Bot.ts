@@ -1,11 +1,11 @@
-import { CommandClient } from 'eris';
+import { CommandClient, Guild } from 'eris';
 import { commands } from './Commands';
-import { config } from './';
+import { config } from '../config';
 
 const commandOptions = {
-    description: 'Community Bot for the Ease server',
+    description: '',
     owner: 'Eleos#0010',
-    prefix: ['@mention', 'm!'],
+    prefix: ['@mention', 'u!'],
 };
 
 export const bot = new CommandClient(config.token, {}, commandOptions);
@@ -15,6 +15,19 @@ bot.connect();
 bot.once('ready', () => {
     console.log('[startup] Bot ready.');
 });
+
+bot.on('guildCreate', (guild: Guild) => {
+    const ownerChannel = guild.members.get(guild.ownerID);
+
+    const embed = { embed: {
+        title: '*Hey there!*',
+        description: 'We\'re glad you\'re interested in UpvoteBot! Before we get started you need to set up some stuff. Visit [UpvoteBot\'s website](google.com) for a guide.'
+    }}
+
+    if (!ownerChannel) {
+        return;
+    }
+})
 
 bot.on('error', (e: Error) => {
     console.log(e);

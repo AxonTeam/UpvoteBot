@@ -1,19 +1,29 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { Upvote, config } from './';
+import { Upvote } from './';
+import { BotModel } from '../other'
 
 export const app = express();
 app.use(bodyParser.json());
 
 app.post('/upvote/:botID', async (req: Request, res: Response) => {
-    // Abort if wrong authorization header
-    if (config.authorization.length > 0 && req.headers.authorization !== config.authorization) {
-        return console.log('[express] A request to /upvote arrived with the wrong authorization header...\n' + req.headers.authorization);
+    const reqBot: any = await BotModel.findOne({ botID: req.params.botID });
+
+    if (!reqBot || !reqBot.active || req.body.authentication !== reqBot.authentication) {
+        return;
     }
 
     await Upvote.handle(req);
 });
 
 app.get('/', (req: Request, res: Response) => {
+    res.send('TBI');
+});
+
+app.get('/faq', (req: Request, res: Response) => {
+    res.send('TBI');
+});
+
+app.get('/setup', (req: Request, res: Response) => {
     res.send('TBI');
 });
