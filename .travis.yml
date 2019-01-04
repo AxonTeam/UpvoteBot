@@ -1,0 +1,8 @@
+language: node_js
+node_js: 10
+
+install: yarn
+cache: yarn
+
+before_script: mv config_template.ts config.ts
+script: yarn compile
