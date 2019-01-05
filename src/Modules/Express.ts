@@ -19,11 +19,3 @@ app.post('/upvote/:botID', async (req: Request, res: Response) => {
 app.get('/', (req: Request, res: Response) => {
     res.send('TBI');
 });
-
-app.get('/faq', (req: Request, res: Response) => {
-    res.send('TBI');
-});
-
-app.get('/setup', (req: Request, res: Response) => {
-    res.send('TBI');
-});
