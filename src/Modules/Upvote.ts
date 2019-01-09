@@ -1,21 +1,15 @@
 import { Member } from 'eris';
 import { Request } from 'express';
-import { bot, Reminder, getSuperb, config } from './';
+import { bot, Reminder, getSuperb } from './';
 
 /**
  * Handles everything related to upvotes.
  *
  * @class UpvoteClass
  */
+/*
 class UpvoteClass {
 
-    /**
-     * Handle upvotes (no shit)
-     *
-     * @private
-     * @param {Request} req
-     * @memberof UpvoteClass
-     */
     public async handle(req: Request) {
         console.log(`[upvote] Upvote recieved! Searching for ${req.body.user}...`);
 
@@ -41,14 +35,6 @@ class UpvoteClass {
         }
     }
 
-    /**
-     * Send a direct message to a user after 12 hours.
-     *
-     * @public
-     * @param {Member} upvoter
-     * @param {boolean} manual Set to true if the reminder was set manually
-     * @memberof UpvoteClass
-     */
     public async setReminder(upvoter: Member, manual: boolean) {
         const upvoteReminder = async () => {
             try {
@@ -80,19 +66,11 @@ class UpvoteClass {
         return await Reminder.add(`upvote:${upvoter.id}`, 43200000, upvoteReminder, upvoter.id);
     }
 
-    /**
-     * Send the upvote message
-     *
-     * @private
-     * @param {Member} upvoter
-     * @param {boolean} isWeekend
-     * @memberof UpvoteClass
-     */
     private async sendUpvoteMessage(upvoter: Member, isWeekend: boolean) {
         let msg: string = '';
 
         if (isWeekend) {
-                const points = await Transactions.add(upvoter.id, 2, 'Upvote on DBL (Voting Multiplier).');
+               const points = await Transactions.add(upvoter.id, 2, 'Upvote on DBL (Voting Multiplier).');
                 msg = `${getSuperb()}, <@${upvoter.id}> has upvoted on DBL during an active voting multiplier! Points: ${points}`;
             } else {
                 const points = await Transactions.add(upvoter.id, 1, 'Upvote on DBL.');
@@ -105,3 +83,4 @@ class UpvoteClass {
 }
 
 export const Upvote = new UpvoteClass();
+*/

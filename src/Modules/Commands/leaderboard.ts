@@ -1,5 +1,5 @@
 import { MoustacheCommand } from './';
-import { bot, config } from '../';
+import { bot } from '../';
 import { PointsModel } from '../../other/';
 
 export const leaderboard: MoustacheCommand = {

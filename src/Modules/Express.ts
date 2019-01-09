@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import { Upvote } from './';
+//import { Upvote } from './';
 import { BotModel } from '../other'
 
 export const app = express();
@@ -16,7 +16,7 @@ app.post('/upvote/:botID', async (req: Request, res: Response) => {
         return;
     }
 
-    await Upvote.handle(req);
+    //await Upvote.handle(req);
 });
 
 app.get('/', (req: Request, res: Response) => {
@@ -28,5 +28,5 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.get('/settings/:botid', (req: Request, res: Response) => {
-    
+
 });
