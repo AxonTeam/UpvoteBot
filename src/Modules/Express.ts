@@ -17,42 +17,40 @@ function checkSignature(req: Request) {
     return req.signedCookies.signature === config.cookieContent;
 }
 
-app.get('/', (req: Request, res: Response) => {
-    // do something else when the url has a code from discord
-    if (req.query.code) {
-        // dont request new tokens if TokenManager has them already
-        request
-            .post('https://discordapp.com/api/oauth2/token')
-            .send({
-                client_id: config.clientID,
-                client_secret: config.secret,
-                grant_type: 'authorization_code',
-                code: req.query.code,
-                redirect_uri: 'TBI!!',
-                scope: 'identify guilds'
-            })
-            .type('form')
-            .then(
-            (tokenres) => {
-                request
-                    .get('https://discordapp.com/api/users/@me')
-                    .set('Authorization', 'Bearer ' + tokenres.body.access_token)
-                    .then(
-                        (userres) => {
-                            TokenManager.add(userres.body.id, tokenres.body.access_token, tokenres.body.expires);
+app.get('/', async (req: Request, res: Response) => {
 
-                            res.cookie('loggedin', true, { expires: tokenres.body.expires })
-                            res.cookie('userID', userres.body.id, { expires: tokenres.body.expires });
-                            res.cookie('username', userres.body.username, { expires: tokenres.body.expires });
-                            res.cookie('useravatar', userres.body.avatar, { expires: tokenres.body.expires });
-                            res.cookie('signature', config.cookieContent, { signed: true, httpOnly: true, expires: tokenres.body.expires });
-                            res.sendStatus(200);
-                        },
-                        () => {
-                            return res.status(400).send('We weren\'t able to get your account information from Discord. ono')
-                        });
-                
-            });
+    if (req.query.code) {
+        try {
+            const tokenResponse = await request
+                .post('https://discordapp.com/api/oauth2/token')
+                .send({
+                    client_id: config.clientID,
+                    client_secret: config.secret,
+                    grant_type: 'authorization_code',
+                    code: req.query.code,
+                    redirect_uri: 'TBI!!',
+                    scope: 'identify guilds'
+                })
+                .type('form');
+            const { access_token, expires } = tokenResponse.body;
+
+            const userResponse = await request
+                .get('https://discordapp.com/api/users/@me')
+                .set('Authorization', 'Bearer ' + access_token);
+            const { id, username, avatar } = userResponse.body;
+
+            TokenManager.add(id, access_token, expires);
+            res.cookie('loggedin', true, { expires: expires });
+            res.cookie('userID', id, { expires: expires });
+            res.cookie('username', username, { expires: expires });
+            res.cookie('useravatar', avatar, { expires: expires });
+            res.cookie('signature', config.cookieContent, { signed: true, httpOnly: true, expires: expires });
+            res.send(200);
+            res.send('TBI');
+        } catch (error) {
+            console.log(error);
+            return res.status(400).send('We were not able to get your account information from Discord. ')
+        }
     }
 
     res.send('TBI');
@@ -85,21 +83,22 @@ app.get('/account/:userID', async (req: Request, res: Response) => {
     }
 
     let guilds = [];
-    request
-        .get('https://discordapp.com/api/users/@me')
-        .then((guildres) => {
-            guildres.body.forEach((element: any) => {
-                if (bot.guilds.has(element.id)) {
-                    if (bot.guilds.get(element.id)!.ownerID === req.params.userID) {
-                        guilds.push(element);
-                    }
-                }
-            });
-        },
-        () => {
-            return res.status(400).send('We couldn\'t get your guilds from Discord.')
-        });
+    try {
+        const guildrequest = await request
+            .get('https://discordapp.com/api/users/@me/guilds')
+            .set('Authorization', 'Bearer ' + bearer);
+        
+        guildrequest.body.forEach((element: any) => {
+            const guild = bot.guilds.get(element.id);
 
+            if (guild && guild.ownerID === req.params.userID) {
+                guilds.push(element);
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(400).send('We could not get your guilds from Discord.');
+    }
     
 });
 
