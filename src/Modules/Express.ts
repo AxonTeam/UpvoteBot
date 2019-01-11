@@ -91,7 +91,7 @@ app.get('/account/:userID', async (req: Request, res: Response) => {
         guildrequest.body.forEach((element: any) => {
             const guild = bot.guilds.get(element.id);
 
-            if (guild && guild.ownerID === req.params.userID) {
+            if (guild && element.owner) {
                 guilds.push(element);
             }
         });
