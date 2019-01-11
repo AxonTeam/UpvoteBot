@@ -56,13 +56,13 @@ app.get('/', async (req: Request, res: Response) => {
     res.send('TBI');
 });
 
-app.get('/settings/:botID', async (req: Request, res: Response) => {
+app.get('/settings/:guildID', async (req: Request, res: Response) => {
     const authorized = checkSignature(req);
     if (!authorized) {
         return res.sendStatus(401);
     }
 
-    const reqBot = await BotModel.findOne({ botID: req.params.botID });
+    const reqBot = await BotModel.findOne({ guildID: req.params.guildID });
 
     if (reqBot) {
         return res.status(200).send(reqBot.toObject());
