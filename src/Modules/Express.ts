@@ -13,8 +13,22 @@ app.use(cookieParser(config.cookieSecret))
 // Oauth url: https://discordapp.com/oauth2/authorize?client_id=532627938122924055&scope=identify%20guilds&response_type=code&redirect_uri=
 // Needs state & redirect ^
 
-function checkSignature(req: Request) {
-    return req.signedCookies.signature === config.cookieContent;
+function checkRequest(req: Request, checks: string[]) {
+    let pass = true;
+
+    if (checks.includes('userID')) {
+        if (!req.signedCookies.userID) pass = false;
+    }
+
+    if (checks.includes('signature')) {
+        if (!req.signedCookies.signature) pass = false;
+    }
+
+    if (checks.includes('bearer')) {
+        if (!TokenManager.get(req.signedCookies.userID)) pass = false;
+    }
+
+    return pass;
 }
 
 app.get('/', async (req: Request, res: Response) => {
@@ -42,6 +56,7 @@ app.get('/', async (req: Request, res: Response) => {
             TokenManager.add(id, access_token, expires);
             res.cookie('loggedin', true, { expires: expires });
             res.cookie('userID', id, { expires: expires });
+            res.cookie('signedUserID', id, { signed: true, expires: expires })
             res.cookie('username', username, { expires: expires });
             res.cookie('useravatar', avatar, { expires: expires });
             res.cookie('signature', config.cookieContent, { signed: true, httpOnly: true, expires: expires });
@@ -57,8 +72,13 @@ app.get('/', async (req: Request, res: Response) => {
 });
 
 app.get('/settings/:guildID', async (req: Request, res: Response) => {
-    const authorized = checkSignature(req);
+    const authorized = checkRequest(req, ['signature', 'userID']);
     if (!authorized) {
+        return res.sendStatus(401);
+    }
+
+    const guild = bot.guilds.get(req.params.guildID);
+    if (!guild || guild.ownerID !== req.signedCookies.userID) {
         return res.sendStatus(401);
     }
 
@@ -71,16 +91,13 @@ app.get('/settings/:guildID', async (req: Request, res: Response) => {
     }
 });
 
-app.get('/account/:userID', async (req: Request, res: Response) => {
-    const authorized = checkSignature(req);
+app.get('/account/', async (req: Request, res: Response) => {
+    const authorized = checkRequest(req, ['signature', 'bearer']);
     if (!authorized) {
         return res.sendStatus(401);
     }
 
-    const bearer = TokenManager.get(req.params.userID);
-    if (!bearer) {
-        return res.sendStatus(400);
-    }
+    const bearer = TokenManager.get(req.signedCookies.userID)
 
     let guilds = [];
     try {
