@@ -1,18 +1,13 @@
 {
-    "defaultSeverity": "error",
-    "extends": [
-        "tslint:recommended"
-    ],
-    "jsRules": {},
+    "extends": "tslint:recommended",
     "rules": {
         "indent": [true, "spaces", 4],
         "quotemark": [true, "single"],
         "ordered-imports": false,
         "max-line-length": false,
-        "object-literal-shorthand": false,
         "no-console": false,
         "object-literal-sort-keys": false,
         "interface-name": false,
-    },
-    "rulesDirectory": []
+        "trailing-comma": false
+    }
 }

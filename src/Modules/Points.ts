@@ -1,5 +1,6 @@
 import { PointsModel } from '../other/';
 
+// Should take a look again
 class PointsClass {
 
     /**
@@ -9,13 +10,13 @@ class PointsClass {
      * @returns Points Document, or null if not found
      * @memberof Points
      */
-    public async find(userID: string) {
-        const userPoints = await PointsModel.findOne({ userID: userID });
+    public async find(userID: string, guildID: string) {
+        const userPoints = await PointsModel.findOne({ userID, guildID });
 
         if (userPoints) {
             return userPoints;
         } else {
-            return null;
+            return this.create(userID, guildID);
         }
     }
 
@@ -44,7 +45,7 @@ class PointsClass {
         }
 
         try {
-            saved = await userPoints.save()
+            saved = await userPoints.save();
         } catch (err) {
             console.log(err);
             saved = null;
@@ -64,7 +65,7 @@ class PointsClass {
      */
     private async create(userID: string, guildID: string) {
         const userPoints = new PointsModel({
-            userID: userID,
+            userID,
             guilds: new Map([[guildID, 0]])
         });
 
