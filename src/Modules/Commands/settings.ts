@@ -34,9 +34,6 @@ export const settings: MoustacheCommand = {
             1. active
             2. roleReward
             3. upvoteMessage
-        3. Edits
-            -> Shows recent edits
-            -> Back reaction
 
     Proposal 2:
     - CLI style quick settings
@@ -46,7 +43,6 @@ export const settings: MoustacheCommand = {
         -> Changes the setting
     - -s or --setting (setting e.g. active)
         -> Enables/Disables specified setting
-    - -e or --edits (still sends an embed with recent edits)
 
     i personally liek 2 more
 */

@@ -1,5 +1,5 @@
-import { PointsModel } from '../../other';
-import { bot, Points, Reminder, /*Upvote*/ } from '../'
+import { PointsModel, botProfileModel, ReminderModel } from '../../other';
+import { bot, Points, Reminder, BotProfileManager, /*Upvote*/ } from '../';
 import { MoustacheCommand } from './';
 import { inspect } from 'util';
 
@@ -8,12 +8,15 @@ export const evalCmd: MoustacheCommand = {
     execute: async (msg, args) => {
         try {
             const modules = {
-                bot: bot,
+                bot,
                 points: Points,
-                //upvote: Upvote,
+                // upvote: Upvote,
                 reminder: Reminder,
+                botprofman: BotProfileManager,
                 pointsmod: PointsModel,
-            }
+                botprofmod: botProfileModel,
+                remindermod: ReminderModel,
+            };
 
             let evaled = await eval(args.join(' '));
 
@@ -22,35 +25,35 @@ export const evalCmd: MoustacheCommand = {
             } else {
                 evaled = String(evaled);
             }
-    
+
             // Just in case.
             evaled = evaled.split(bot.token).join('[A weird crystal pattern covering this part of the message is not allowing you to read it.]');
-    
+
             const charlength = evaled.length;
-    
+
             if (evaled.length === 0) {
                 return;
             }
-    
+
             if (evaled.length > 2000) {
                 evaled = evaled.match(/[\s\S]{1,1900}[\n\r]/g) || [];
-            if (evaled.length > 3) {
-                bot.createMessage(msg.channel.id, `Cut the response! [${evaled.length} | ${charlength}]`);
-                bot.createMessage(msg.channel.id, `\`\`\`js\n${evaled[0]}\`\`\``);
-                bot.createMessage(msg.channel.id, `\`\`\`js\n${evaled[1]}\`\`\``);
-                bot.createMessage(msg.channel.id, `\`\`\`js\n${evaled[2]}\`\`\``);
-                return;
-            } else {
+                if (evaled.length > 3) {
+                    bot.createMessage(msg.channel.id, `Cut the response! [${evaled.length} | ${charlength}]`);
+                    bot.createMessage(msg.channel.id, `\`\`\`js\n${evaled[0]}\`\`\``);
+                    bot.createMessage(msg.channel.id, `\`\`\`js\n${evaled[1]}\`\`\``);
+                    bot.createMessage(msg.channel.id, `\`\`\`js\n${evaled[2]}\`\`\``);
+                    return;
+                } else {
                     return evaled.forEach((message: string) => {
                         bot.createMessage(msg.channel.id, `\`\`\`js\n${message}\`\`\``);
                         return;
                     });
                 }
             }
-        
+
             return bot.createMessage(msg.channel.id, `\`\`\`js\n${evaled}\`\`\``);
         } catch (err) {
-            console.log(err.stack)
+            console.log(err.stack);
             return bot.createMessage(msg.channel.id, err.message ? err.message : err.name);
         }
     },

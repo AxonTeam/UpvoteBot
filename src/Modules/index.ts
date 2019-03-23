@@ -4,4 +4,4 @@ export * from './Bot';
 export * from './Points';
 export * from './Reminder';
 export * from './Express';
-export * from './TokenManager';
+export * from './BotProfileManager';

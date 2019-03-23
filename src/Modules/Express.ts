@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import { bot } from './';
-import { botProfileModel } from '../other'
+import { botProfileModel } from '../other';
 
 export const app = express();
 app.use(bodyParser.json());

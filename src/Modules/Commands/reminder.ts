@@ -35,12 +35,12 @@ const subOptin: MoustacheCommand = {
         fullDescription: 'Opt back into moustache reminders after you opted out. You will recieve reminders again after using this command.',
         usage: ''
     }
-}
+};
 
 const subUpvote: MoustacheCommand = {
     execute: async (msg, args) => {
         if (!msg.member) {
-            return 'This command can only be executed in a server.';
+            return 'This command can only be used in a server.';
         }
 
         const set = await Upvote.setReminder(msg.member);
@@ -55,10 +55,10 @@ const subUpvote: MoustacheCommand = {
     label: 'upvote',
     options: {
         description: 'Set an upvote reminder.',
-        fullDescription: 'Set a reminder to upvote for yourself (or for a specified user if a Ruler is using the command).',
+        fullDescription: 'Set a reminder to upvote for yourself.',
         usage: '(userID)'
     }
-}
+};
 
 const subRemoveAll: MoustacheCommand = {
     execute: async (msg) => {
@@ -72,7 +72,7 @@ const subRemoveAll: MoustacheCommand = {
         fullDescription: 'Removes all reminders that are set for you. **This cannot be undone.**',
         usage: ''
     }
-}
+};
 
 export const reminder: MoustacheCommand = {
     execute: async () => {
@@ -81,7 +81,7 @@ export const reminder: MoustacheCommand = {
     label: 'reminder',
     options: {
         description: 'See m!help reminder.',
-        fullDescription:'Everything related to reminders. See m!help reminder.',
+        fullDescription: 'Everything related to reminders. See m!help reminder.',
         usage: '',
     },
     subcommands: [subOptin, subOptout, subRemoveAll, subUpvote]

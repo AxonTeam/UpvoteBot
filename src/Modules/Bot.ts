@@ -43,6 +43,6 @@ commands.forEach((element) => {
         element.subcommands.forEach((subcommand) => {
             command.registerSubcommand(subcommand.label, subcommand.execute, subcommand.options);
             console.log(`[startup] Subcommand registered: ${element.label} ${subcommand.label}`);
-        })
+        });
     }
 });

@@ -1,5 +1,6 @@
 import { botProfileModel } from '../other';
 import { Document } from 'mongoose';
+import { Message } from 'eris';
 
 /*
     Need to collect some thoughts hereeee
@@ -22,14 +23,7 @@ import { Document } from 'mongoose';
     Dont forget to add lean document functionality in case the express api thingy gets public
 */
 
-interface Edit {
-    name: string;
-    date: Date;
-    setting: string;
-    changedTo: string | boolean;
-}
-
-class BotProfileManager {
+class BotProfileManagerClass {
     public async get(guildID: string) {
         const bot = await botProfileModel.findOne({guildID});
 
@@ -44,6 +38,7 @@ class BotProfileManager {
             roleRewardID: '',
             upvoteMessageChannelID: '',
             pointName: '',
+            allowedRoles: '',
             boolSettings: {
                 active: false,
                 roleReward: false,
@@ -55,24 +50,33 @@ class BotProfileManager {
         return await botProfile.save();
     }
 
-    public async changeValue(value: string, input: string, guildID?: string, gotBotProfile?: Document,) {
+    public async changeValue(value: string, input: string, guildID?: string, gotBotProfile?: Document) {
         const botProfile = await this.profileValidation(gotBotProfile, guildID);
 
         botProfile.set(value, input);
         botProfile.save();
     }
 
-    public async changeSetting(setting: string, input: boolean, guildID?: string, gotBotProfile?: Document,) {
+    public async changeSetting(setting: string, input: boolean, guildID?: string, gotBotProfile?: Document) {
         const botProfile = await this.profileValidation(gotBotProfile, guildID);
         const settings = botProfile.get('boolSettings', Object);
-        settings[setting] = input;
 
+        settings[setting] = input;
         botProfile.set('boolSettings', settings);
         botProfile.save();
     }
 
-    public async edits(add?: Edit) {
+    public async roleValidation(msg: Message, botProfile: Document) {
+        if (!msg.member) {
+            throw new Error('BotProfileManagerClass.roleValidation() used outside a guild');
+        }
 
+        const allowedRoles: string[] = botProfile.get('allowedRoles', Array);
+        const memberRoles = msg.member.roles;
+
+        return allowedRoles.some((role) => {
+            return memberRoles.includes(role);
+        });
     }
 
     // Either get a profile through guildID or use an already gotten profile instead
@@ -88,9 +92,11 @@ class BotProfileManager {
                 throw new Error('No profile found for guildID');
             }
         } else {
-            throw new Error('Neither guildID or gotBotProfile given to BotProfileManager.changeSetting()');
+            throw new Error('Neither guildID or gotBotProfile given to BotProfileManagerClass.changeSetting()');
         }
 
         return botProfile;
     }
 }
+
+export const BotProfileManager = new BotProfileManagerClass();

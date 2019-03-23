@@ -4,8 +4,8 @@ import { PointsModel } from '../../other/';
 
 export const leaderboard: MoustacheCommand = {
     execute: async (msg) => {
-        const data = await PointsModel.find({}).sort('-points').limit(10);
-        const fields: Object[] = [];
+        const data = await PointsModel.find({ guildID: (msg as any).channel.guild }).sort('-points').limit(10);
+        const fields: object[] = [];
         const guild = bot.guilds.get((msg as any).channel.guild);
 
         if (!guild) {
@@ -26,21 +26,21 @@ export const leaderboard: MoustacheCommand = {
                     value: `Points: ${element.points}`
                 });
             }
-        })
+        });
 
         const embed = {
             embed: {
                 color: 0x7289da,
-                fields: fields
+                fields
             }
-        }
+        };
 
         return bot.createMessage(msg.channel.id, embed);
     },
     label: 'leaderboard',
     options: {
         description: 'Shows the point leaderboard.',
-        fullDescription: 'Shows the top 10 users with the most points.',
+        fullDescription: 'Shows the top 10 users in the guild with the most points.',
         usage: ''
     }
-}
+};

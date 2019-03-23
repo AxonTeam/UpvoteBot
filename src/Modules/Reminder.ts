@@ -1,5 +1,5 @@
-import { Message } from "eris";
-import { ReminderModel } from "../other";
+import { Message } from 'eris';
+import { ReminderModel } from '../other';
 
 export interface MoustacheReminder {
     id: string;
@@ -16,48 +16,14 @@ export interface MoustacheReminder {
  */
 class ReminderClass {
     private reminderCache: Map<string, MoustacheReminder>;
-    private ignoredCache: Map<string, null>
+    private ignoredCache: Map<string, null>;
 
     constructor() {
         this.reminderCache = new Map();
         this.ignoredCache = new Map();
 
         this.init()
-            .catch(e => console.log(e));
-    }
-
-    /**
-     * Initialises the reminder cache by looking for an already saved cache and setting all stored timeouts again.
-     *
-     * @private
-     * @returns {Promise<void>}
-     * @memberof ReminderClass
-     */
-    private async init(): Promise<void> {
-        const savedCache = await ReminderModel.findOne({ version: 1 });
-        const currentTime = new Date().getMilliseconds();
-
-        if (!savedCache) {
-            return console.log('[reminder] No saved reminder cache found!');
-        } else {
-            this.reminderCache = (savedCache as any).cache;
-            this.ignoredCache = (savedCache as any).ignored;
-        }
-
-        this.reminderCache.forEach((value) => {
-            const delay = value.triggerTime - currentTime;
-            const timeout = setTimeout(async () => {
-                value.execute();
-
-                await this.removeAfterTimeout(value.id);
-            }, delay);
-
-            value.timeout = timeout;
-
-            console.log(`[reminder] Set cached reminder ${value.id}`);
-        });
-
-        return console.log('[reminder] All cached reminders are set again.');
+            .catch((e) => console.log(e));
     }
 
     /**
@@ -91,11 +57,11 @@ class ReminderClass {
 
         // construct the reminder object
         const reminder: MoustacheReminder = {
-            id: id,
-            userID: userID,
+            id,
+            userID,
             triggerTime: currentTime + delay,
-            timeout: timeout,
-            execute: execute
+            timeout,
+            execute
         };
 
         // add reminder to this.reminderCache
@@ -112,7 +78,7 @@ class ReminderClass {
      * Manually remove a reminder.
      *
      * @param {string} id ID of the reminder
-     * @returns {Promise<boolean | null>} True if successfully removed, null if the reminder wasn't found 
+     * @returns {Promise<boolean | null>} True if successfully removed, null if the reminder wasn't found
      * @memberof ReminderClass
      */
     public async remove(id: string): Promise<boolean | null> {
@@ -127,24 +93,8 @@ class ReminderClass {
         this.reminderCache.delete(id);
 
         await this.save();
-        
+
         return true;
-    }
-
-    /**
-     * Called by a reminder to remove itself from the cache.
-     *
-     * @private
-     * @param {string} id ID of the reminder
-     * @memberof ReminderClass
-     */
-    private async removeAfterTimeout(id: string) {
-        // Interval was already cleared at this point
-        // delete from cache
-        this.reminderCache.delete(id);
-
-        // update DB
-        await this.save();
     }
 
     /**
@@ -159,32 +109,6 @@ class ReminderClass {
                 await this.remove(value.id);
             }
         });
-    }
-
-    /**
-     * Save the cache to the DB.
-     *
-     * @private
-     * @memberof ReminderClass
-     */
-    private async save() {
-        const cache = await ReminderModel.findOne({ version: 1 });
-
-        if (!cache) {
-            return new Error('Couldn\'t save cache to DB!');
-        }
-
-        (cache as any).cache = this.reminderCache;
-        (cache as any).ignored = this.ignoredCache;
-
-        cache.markModified('cache');
-        cache.markModified('ignored');
-
-        try {
-            await cache.save();
-        } catch (err) {
-            console.log(err);
-        }
     }
 
     /**
@@ -232,6 +156,82 @@ class ReminderClass {
         await this.save();
 
         return true;
+    }
+
+    /**
+     * Initialises the reminder cache by looking for an already saved cache and setting all stored timeouts again.
+     *
+     * @private
+     * @returns {Promise<void>}
+     * @memberof ReminderClass
+     */
+    private async init(): Promise<void> {
+        const savedCache = await ReminderModel.findOne({ version: 1 });
+        const currentTime = new Date().getMilliseconds();
+
+        if (!savedCache) {
+            return console.log('[reminder] No saved reminder cache found!');
+        } else {
+            this.reminderCache = (savedCache as any).cache;
+            this.ignoredCache = (savedCache as any).ignored;
+        }
+
+        this.reminderCache.forEach((value) => {
+            const delay = value.triggerTime - currentTime;
+            const timeout = setTimeout(async () => {
+                value.execute();
+
+                await this.removeAfterTimeout(value.id);
+            }, delay);
+
+            value.timeout = timeout;
+
+            console.log(`[reminder] Set cached reminder ${value.id}`);
+        });
+
+        return console.log('[reminder] All cached reminders are set again.');
+    }
+
+    /**
+     * Called by a reminder to remove itself from the cache.
+     *
+     * @private
+     * @param {string} id ID of the reminder
+     * @memberof ReminderClass
+     */
+    private async removeAfterTimeout(id: string) {
+        // Interval was already cleared at this point
+        // delete from cache
+        this.reminderCache.delete(id);
+
+        // update DB
+        await this.save();
+    }
+
+    /**
+     * Save the cache to the DB.
+     *
+     * @private
+     * @memberof ReminderClass
+     */
+    private async save() {
+        const cache = await ReminderModel.findOne({ version: 1 });
+
+        if (!cache) {
+            return new Error('Couldn\'t save cache to DB!');
+        }
+
+        (cache as any).cache = this.reminderCache;
+        (cache as any).ignored = this.ignoredCache;
+
+        cache.markModified('cache');
+        cache.markModified('ignored');
+
+        try {
+            await cache.save();
+        } catch (err) {
+            console.log(err);
+        }
     }
 }
 
