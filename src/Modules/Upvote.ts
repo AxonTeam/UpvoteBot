@@ -7,7 +7,7 @@ import { bot, Reminder, getSuperb } from './';
  *
  * @class UpvoteClass
  */
-/*
+
 class UpvoteClass {
 
     public async handle(req: Request) {
@@ -83,4 +83,3 @@ class UpvoteClass {
 }
 
 export const Upvote = new UpvoteClass();
-*/

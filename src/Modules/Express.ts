@@ -7,10 +7,12 @@ export const app = express();
 app.use(bodyParser.json());
 
 app.post('/upvote/:botID', async (req: Request, res: Response) => {
-    const reqBot: any = await botProfileModel.findOne({ botID: req.params.botID });
+    const reqBot: Document = await botProfileModel.findOne({ botID: req.params.botID });
 
-    if (!reqBot || !reqBot.active || req.body.authentication !== reqBot.authentication) {
+    if (!reqBot) {
         return;
+    } else if (!reqBot.get('active') || req.body.authentication !== reqBot.authentication) {
+
     }
 
     // await Upvote.handle(req);

@@ -1,4 +1,5 @@
 import { PointsModel } from '../other/';
+import { Document } from 'mongoose';
 
 // Should take a look again
 class PointsClass {
@@ -30,9 +31,9 @@ class PointsClass {
      * @returns Saved Points Document if successful/forced, false if change would result in negative points, null if something went wrong
      * @memberof Points
      */
-    public async change(userPoints: any, guildID: string, amount: number, force: boolean) {
-        const guildPoints = userPoints.guilds.get(guildID);
-        let saved;
+    public async change(userPoints: Document, guildID: string, amount: number, force: boolean) {
+        const guildPoints = userPoints.get('points', Number);
+        let saved: Document | null;
 
         if ((guildPoints + amount) < 0) {
             if (force) {

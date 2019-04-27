@@ -1,62 +1,25 @@
-import { Upvote, Reminder, bot } from '../index';
-import { MoustacheCommand } from './index';
-
-const subOptout: MoustacheCommand = {
-    execute: async (msg) => {
-        const optedOut = await Reminder.optout(msg.author.id);
-
-        if (optedOut) {
-            return 'You opted out of moustache reminders, all reminders for you have been deleted. If you want to recieve reminders again, see `m!help`.';
-        } else {
-            return 'You already opted out of moustache reminders. If you want to recieve reminders again, see `m!help`.';
-        }
-    },
-    label: 'optout',
-    options: {
-        description: 'Opt out of reminders.',
-        fullDescription: 'Opt out of any reminders that moustache will send you. You won\'t recieve any reminders unless you opt back in.',
-        usage: ''
-    }
-};
-
-const subOptin: MoustacheCommand = {
-    execute: async (msg) => {
-        const optedIn = await Reminder.optin(msg.author.id);
-
-        if (optedIn) {
-            return 'You opted back into moustache reminders.';
-        } else {
-            return 'You aren\'t opted out of moustache reminders. If you don\'t want to recieve reminders, see `m!help`.';
-        }
-    },
-    label: 'optin',
-    options: {
-        description: 'Opt back into reminders.',
-        fullDescription: 'Opt back into moustache reminders after you opted out. You will recieve reminders again after using this command.',
-        usage: ''
-    }
-};
+import { Upvote, Reminder, bot } from '../';
+import { MoustacheCommand } from './';
 
 const subUpvote: MoustacheCommand = {
-    execute: async (msg, args) => {
+    execute: async (msg) => {
         if (!msg.member) {
-            return 'This command can only be used in a server.';
+            return 'This command can only be executed in a guild.';
         }
 
-        const set = await Upvote.setReminder(msg.member);
+        const set = await Upvote.setReminder(msg.member, true);
 
         if (set) {
-            return 'I will remind you to upvote in 12 hours.';
+                return 'I will remind you to upvote in 12 hours.';
         } else {
             return 'You already have an upvote reminder set.';
         }
-
     },
     label: 'upvote',
     options: {
         description: 'Set an upvote reminder.',
-        fullDescription: 'Set a reminder to upvote for yourself.',
-        usage: '(userID)'
+        fullDescription: 'Set a reminder to upvote a bot. Which bot depends on the guild you use the command in. You can\'t set multiple reminders for the same bot.',
+        usage: ''
     }
 };
 
@@ -68,8 +31,8 @@ const subRemoveAll: MoustacheCommand = {
     },
     label: 'removeAll',
     options: {
-        description: 'Removes all reminders that are set for you. **This can\'t be undone.**',
-        fullDescription: 'Removes all reminders that are set for you. **This cannot be undone.**',
+        description: 'Removes all for you set reminders. **This can\'t be undone.**',
+        fullDescription: 'Removes all for you set reminders. **This cannot be undone.**',
         usage: ''
     }
 };
@@ -80,9 +43,9 @@ export const reminder: MoustacheCommand = {
     },
     label: 'reminder',
     options: {
-        description: 'See m!help reminder.',
-        fullDescription: 'Everything related to reminders. See m!help reminder.',
+        description: 'Everything related to reminders.',
+        fullDescription: '',
         usage: '',
     },
-    subcommands: [subOptin, subOptout, subRemoveAll, subUpvote]
+    subcommands: [subRemoveAll, subUpvote]
 };
