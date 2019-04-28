@@ -1,8 +1,19 @@
-import { BotProfileManager } from '../';
-import { MoustacheCommand } from './';
+import { BotProfileManager } from '..';
+import { MoustacheCommand } from '.';
 import { TextChannel } from 'eris';
 
-export const settings: MoustacheCommand = {
+const setting: MoustacheCommand = {
+    execute: async (msg, args) => {},
+    label: 'setting',
+    options: {
+        description: 'See the current state of an option. (See u!help settings)',
+        fullDescription: 'uwu i dwidnt implwemwent this pwath wyet ono',
+        usage: '',
+        aliases: ['s']
+    }
+}
+
+export const changeSetting: MoustacheCommand = {
     execute: async (msg, args) => {
         // args = -v pointName fucks
         let valueMode: boolean; // true if "-v" or "--value", false if "-s" or "--setting"
@@ -46,11 +57,13 @@ export const settings: MoustacheCommand = {
 
         // Remove allowed role
     },
-    label: 'settings',
+    label: '--change',
+    subcommands: [],
     options: {
         description: 'Changes settings. (See u!help settings)',
         fullDescription: 'uwu i dwidnt implwemwent this pwath wyet ono',
-        usage: ''
+        usage: '',
+        aliases: ['-c']
     }
 };
 
