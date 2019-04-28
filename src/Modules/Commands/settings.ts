@@ -1,8 +1,50 @@
-import { MoustacheCommand } from './index';
+import { BotProfileManager } from '../';
+import { MoustacheCommand } from './';
+import { TextChannel } from 'eris';
 
 export const settings: MoustacheCommand = {
-    execute: async (msg) => {
-        return 'hi';
+    execute: async (msg, args) => {
+        // args = -v pointName fucks
+        let valueMode: boolean; // true if "-v" or "--value", false if "-s" or "--setting"
+        let botProfile;
+        const option = args[1]; // pointName
+        const text = args[2]; // fucks
+        const validOption = BotProfileManager.options.includes(option);
+
+        if (!validOption) {
+            return `Invalid usage, **${option}** is not a valid option.`;
+        } else {
+            botProfile = await BotProfileManager.get((msg.channel as TextChannel).guild.id);
+
+            if (botProfile) {
+                console.log('BotProfile not found? GuildID: ' + (msg.channel as TextChannel).guild.id);
+                return 'BotProfile not found, shouldn\'t this be impossible?';
+            }
+        }
+
+        // Determing wether a value or a setting is getting changed
+        switch (args[0]) {
+            case '-v':
+            case '--value':
+                valueMode = true;
+                break;
+
+            case '-s':
+            case '--setting':
+                valueMode = false;
+                break;
+
+            default:
+                return 'Invalid usage, use either `--value () (value)` or `--setting (setting)`.';
+        }
+
+        if (valueMode) {
+            if (option === 'addAllowedRole') {
+                
+            } 
+        }
+
+        // Remove allowed role
     },
     label: 'settings',
     options: {
