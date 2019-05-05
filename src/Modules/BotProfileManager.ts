@@ -1,4 +1,4 @@
-import { botProfileOptions, botProfileModel } from '../other';
+import { botProfileOptions, boolOptions, botProfileModel } from '../other';
 import { Document } from 'mongoose';
 import { Message } from 'eris';
 
@@ -12,29 +12,23 @@ import { Message } from 'eris';
 
     maybe this should be named GuildProfileManager instead?
 
-    settings can be easily changed by specifing a setting in a string param
-    change(setting: string)
-    later: { [setting]: true }
-    tho it doesnt allow multiple settings to be changed at once
-    (not possible anyway due to u!settings proposal 2)
-
     Dont forget to add lean document functionality in case the express api thingy gets public
+
+    issue on github: allow getting a profile through botID for eval cases
 */
 
 class BotProfileManagerClass {
-    public options: string[];
+    public valueOptions: string[];
+    public settingOptions: string[]; // That sounds so dumb omg
+    private cache: Map<string, Document>;
 
     constructor() {
-        this.options = Object.keys(botProfileOptions);
+        this.valueOptions = Object.keys(botProfileOptions);
+        this.settingOptions = Object.keys(boolOptions);
+        this.cache = new Map();
     }
 
-    public async get(guildID: string) {
-        const botProfile = await botProfileModel.findOne({guildID});
-
-        return botProfile;
-    }
-
-    public async create(guildID: string) {
+    public async createProfile(guildID: string) {
         const botProfile = new botProfileModel({
             guildID,
             botID: '',
@@ -43,7 +37,7 @@ class BotProfileManagerClass {
             upvoteMessageChannelID: '',
             pointName: '',
             allowedRoles: [],
-            boolSettings: {
+            boolOptions: {
                 active: false,
                 roleReward: false,
                 upvoteMessage: false
@@ -53,37 +47,65 @@ class BotProfileManagerClass {
         return await botProfile.save();
     }
 
-    public async changeValue(value: string, input: string, guildID: string) {
-        const botProfile = await this.profileValidation(guildID);
+    public async getProfile(guildID: string) {
+        let botProfile: Document | undefined | null;
+
+        if (this.cache.has(guildID)) {
+            botProfile = this.cache.get(guildID);
+        } else {
+            botProfile = await botProfileModel.findOne({guildID});
+        }
+
+        if (!botProfile) {
+            throw new Error('No profile found for guildID');
+        } else {
+            this.cache.set(guildID, botProfile);
+        }
+
+        return botProfile;
+    }
+
+    public async setValue(value: string, input: string | string[], guildID: string) {
+        const botProfile = await this.getProfile(guildID);
+        let saved = false;
 
         botProfile.set(value, input);
         botProfile.save()
-            .then(() => true)
+            .then(() => {
+                this.cache.set(guildID, botProfile);
+                saved = true;
+            })
             .catch((e) => {
                 console.log(`Failure saving botProfile:\n### value: ${value}, input: ${input}, guildID: ${guildID}`);
                 console.log(e);
-                return false;
+                saved = false;
             });
+        return saved;
     }
 
-    public async changeSetting(setting: string, input: boolean, guildID: string) {
-        const botProfile = await this.profileValidation(guildID);
-        const settings = botProfile.get('boolSettings', Object);
+    public async setSetting(setting: string, input: boolean, guildID: string) {
+        const botProfile = await this.getProfile(guildID);
+        const settings = botProfile.get('boolOptions', Object);
+        let saved = false;
 
         settings[setting] = input;
-        botProfile.set('boolSettings', settings);
+        botProfile.set('boolOptions', settings);
         botProfile.save()
-            .then(() => true)
+            .then(() => {
+                this.cache.set(guildID, botProfile);
+                saved = true;
+            })
             .catch((e) => {
                 console.log(`Failure saving botProfile:\n### setting: ${setting}, input: ${input}, guildID: ${guildID}`);
                 console.log(e);
-                return false;
+                saved = false;
             });
+        return saved;
     }
 
-    public async roleValidation(msg: Message, botProfile: Document) {
+    public async validateRoles(msg: Message, botProfile: Document) {
         if (!msg.member) {
-            throw new Error('BotProfileManagerClass.roleValidation() used outside a guild');
+            throw new Error('BotProfileManagerClass.validateRoles() used outside a guild');
         }
 
         const allowedRoles: string[] = botProfile.get('allowedRoles', Array);
@@ -92,16 +114,6 @@ class BotProfileManagerClass {
         return allowedRoles.some((role) => {
             return memberRoles.includes(role);
         });
-    }
-
-    private async profileValidation(guildID: string) {
-        const botProfile = await this.get(guildID);
-
-        if (!botProfile) {
-            throw new Error('No profile found for guildID');
-        }
-
-        return botProfile;
     }
 }
 
