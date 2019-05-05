@@ -11,7 +11,7 @@ export const boolOptions = {
 export const botProfileOptions = {
     guildID: String, // Associated Guild
     botID: String, // ID of the bot that should be tracked
-    authentication: String, // Required authentication string that incoming requests must have.
+    authorization: String, // Required authorization string that incoming requests must have.
     roleRewardID: String, // ID of the role that is given to upvoters
     upvoteMessageChannelID: String, // ID of the channel where upvote messages should be posted
     pointName: String, // Custom points name

@@ -2,41 +2,40 @@ import { BotProfileManager } from '..';
 import { MoustacheCommand } from '.';
 import { TextChannel } from 'eris';
 
-const setting: MoustacheCommand = {
-    execute: async (msg, args) => {
-        const botProfile = await BotProfileManager.getProfile((msg.channel as TextChannel).guild.id);
+const settingDescription = 'The setting commands are built like a CLI.\\\
+\nUsage: e!setting [--change] {--value | --boolean} option [input if --value]\\\
+\n-c, -v, and -b are shorthands for --change, --value and --boolean. input is only required when changing a value.\\\
+\n\nValue settings require a string as input.\\\
+\n`botID` - The ID of the bot whose upvotes should be tracked. (Required)\\\
+\n`authorization` - The authorization string that upvotes need. It must be the same in your DBL webhook settings. (Required)\\\
+\n`roleRewardID` - The ID of a role that should be given to upvoters.\\\
+\n`upvoteMessageChannelID` - The ID of the channel in which upvote messages should be sent.\\\
+\n`pointName` - What points in upvote message should be called. "Points" by default.\\\
+\n`addAllowedRole` - Add a role that is allowed to change these settings.\\\
+\n`removeAllowedRole` - Removes a role from the allowed list again.\\\
+\n\nBoolean options can only be either true or false (false by default). They will be changed to the opposite when you use --change.\\\
+\n`active` - Whether the bot should track upvotes or not.\\\
+\n`roleReward` - If a role should be given to upvoters.\\\
+\n`upvoteMessage` - If the bot should send upvote messages.';
 
-        if (!botProfile) {
-            console.log('BotProfile not found? GuildID: ' + (msg.channel as TextChannel).guild.id);
-            return 'BotProfile not found, shouldn\'t this be impossible?';
-        }
-    },
-    label: 'setting',
-    options: {
-        description: 'See the current state of an option. (See u!help settings)',
-        fullDescription: 'uwu i dwidnt implwemwent this pwath wyet ono',
-        usage: '',
-        aliases: ['s']
-    }
-}
-
-export const changeSetting: MoustacheCommand = {
+const changeSetting: MoustacheCommand = {
     execute: async (msg, args) => {
         // args = -v pointName fucks
-        const valueMode = determValueMode(args[0]); // true if "-v" or "--value", false if "-s" or "--setting"
+        const valueMode = determValueMode(args[0]); // true if "-v" or "--value", false if "-b" or "--boolean"
         const option = args[1]; // pointName
         const text = args[2]; // fucks
+        const guildID = (msg.channel as TextChannel).guild.id;
 
         if (typeof valueMode === null) {
-            return 'Invalid usage, use either `--value () (value)` or `--setting (setting)`.';
+            return 'Invalid usage, use either `--change --value option input` or `--change --boolean option`.';
         }
 
         if (valueMode) {
-            const botProfile = await BotProfileManager.getProfile((msg.channel as TextChannel).guild.id);
+            const botProfile = await BotProfileManager.getProfile(guildID);
             const validOption = BotProfileManager.valueOptions.includes(option);
 
             if (!botProfile) {
-                console.log('BotProfile not found? GuildID: ' + (msg.channel as TextChannel).guild.id);
+                console.log('BotProfile not found? GuildID: ' + guildID);
                 return 'BotProfile not found, shouldn\'t this be impossible?';
             }
 
@@ -61,10 +60,10 @@ export const changeSetting: MoustacheCommand = {
                     allowedRoles.push(text);
                 }
 
-                const saved = BotProfileManager.setValue(option, allowedRoles, (msg.channel as TextChannel).guild.id);
+                const saved = BotProfileManager.setValue(option, allowedRoles, guildID);
 
                 if (saved) {
-                    return `**${text}** is now allowed to change options.`;
+                    return `**${text}** is now allowed to change settings.`;
                 } else {
                     return 'Something went wrong. The setting hasn\'t been changed.';
                 }
@@ -78,15 +77,15 @@ export const changeSetting: MoustacheCommand = {
                     allowedRoles.slice(index, index + 1);
                 }
 
-                const saved = BotProfileManager.setValue(option, allowedRoles, (msg.channel as TextChannel).guild.id);
+                const saved = BotProfileManager.setValue(option, allowedRoles, guildID);
 
                 if (saved) {
-                    return `**${text}** is not allowed to change options anymore.`;
+                    return `**${text}** is not allowed to change settings anymore.`;
                 } else {
                     return 'Something went wrong. The setting hasn\'t been changed.';
                 }
             } else {
-                const saved = BotProfileManager.setValue(option, text, (msg.channel as TextChannel).guild.id);
+                const saved = BotProfileManager.setValue(option, text, guildID);
 
                 if (saved) {
                     return `**${option}** has been set to **${text}**.`;
@@ -95,18 +94,92 @@ export const changeSetting: MoustacheCommand = {
                 }
             }
         } else {
-            // settingOption bleh
+            const botProfile = await BotProfileManager.getProfile(guildID);
+            const validOption = BotProfileManager.booleanOptions.includes(option);
+            const currentOption: boolean = botProfile.get('boolOptions')[option];
+
+            if (!botProfile) {
+                console.log('BotProfile not found? GuildID: ' + guildID);
+                return 'BotProfile not found, shouldn\'t this be impossible?';
+            }
+
+            if (!validOption) {
+                return `Invalid usage, **${option}** is not a valid option.`;
+            }
+
+            if (!BotProfileManager.validateRoles(msg, botProfile)) {
+                return 'You\'re not allowed to change settings.';
+            }
+
+            const saved = BotProfileManager.setSetting(option, !currentOption, guildID);
+
+            if (saved) {
+                return `**${option}** has been set to **${!currentOption}**.`;
+            } else {
+                return 'Something went wrong. The setting hasn\'t been changed.';
+            }
         }
     },
     label: '--change',
-    subcommands: [],
     options: {
-        description: 'Changes settings. (See u!help settings)',
-        fullDescription: 'uwu i dwidnt implwemwent this pwath wyet ono',
+        description: 'Changes settings. (See u!help setting)',
+        fullDescription: settingDescription,
         usage: '',
         aliases: ['-c']
     }
 };
+
+export const setting: MoustacheCommand = {
+    execute: async (msg, args) => {
+        const guildID = (msg.channel as TextChannel).guild.id;
+        const valueMode = determValueMode(args[0]); // true if "-v" or "--value", false if "-s" or "--boolean"
+        const option = args[1];
+        const botProfile = await BotProfileManager.getProfile(guildID);
+
+        if (!botProfile) {
+            console.log('BotProfile not found? GuildID: ' + guildID);
+            return 'BotProfile not found, shouldn\'t this be impossible?';
+        }
+
+        if (typeof valueMode === null) {
+            return 'Invalid usage, use either `--value option` or `--boolean option`.';
+        }
+
+        if (!BotProfileManager.validateRoles(msg, botProfile)) {
+            return 'You\'re not allowed to change settings.';
+        }
+
+        if (valueMode) {
+            const validOption = BotProfileManager.valueOptions.includes(option);
+
+            if (!validOption) {
+                return `Invalid usage, **${option}** is not a valid option.`;
+            }
+
+            const currentOption = botProfile.get(option);
+
+            return `**${option}** is currently set to **${currentOption}**.`;
+        } else {
+            const validOption = BotProfileManager.booleanOptions.includes(option);
+
+            if (!validOption) {
+                return `Invalid usage, **${option}** is not a valid option.`;
+            }
+
+            const currentOption = botProfile.get('boolOptions')[option];
+
+            return `**${option}** is currently set to **${currentOption}**.`;
+        }
+    },
+    label: 'setting',
+    subcommands: [changeSetting],
+    options: {
+        description: 'See the current state of a setting. (See u!help setting)',
+        fullDescription: settingDescription,
+        usage: '',
+        aliases: ['s']
+    }
+}
 
 // Determing wether a value or a setting is getting changed
 function determValueMode(arg: string) {
@@ -118,8 +191,8 @@ function determValueMode(arg: string) {
             valueMode = true;
             break;
 
-        case '-s':
-        case '--setting':
+        case '-b':
+        case '--boolean':
             valueMode = false;
             break;
 

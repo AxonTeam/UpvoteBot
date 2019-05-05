@@ -19,12 +19,12 @@ import { Message } from 'eris';
 
 class BotProfileManagerClass {
     public valueOptions: string[];
-    public settingOptions: string[]; // That sounds so dumb omg
+    public booleanOptions: string[]; // That sounds so dumb omg
     private cache: Map<string, Document>;
 
     constructor() {
         this.valueOptions = Object.keys(botProfileOptions);
-        this.settingOptions = Object.keys(boolOptions);
+        this.booleanOptions = Object.keys(boolOptions);
         this.cache = new Map();
     }
 
