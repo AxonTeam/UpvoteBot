@@ -4,38 +4,33 @@ import { Message } from 'eris';
 
 /*
     Need to collect some thoughts hereeee
-    bots are always linked to a specific guild
-    the guild owner sets a botID to track with u!settings
-    you will never change settings outside of guilds
-    maybe later but always with guilds as context
-    (you need to be in the same guild as the bot youre tracking)
 
     maybe this should be named GuildProfileManager instead?
 
     Dont forget to add lean document functionality in case the express api thingy gets public
-
-    issue on github: allow getting a profile through botID for eval cases
 */
 
 class BotProfileManagerClass {
     public valueOptions: string[];
-    public booleanOptions: string[]; // That sounds so dumb omg
-    private cache: Map<string, Document>;
+    public booleanOptions: string[];
+    private optionCache: Map<string, Document>; // Cached profiles for settings
+    private botToGuildCache: Map<string, string>; // Cached profiles for upvotes
 
     constructor() {
         this.valueOptions = Object.keys(botProfileOptions);
         this.booleanOptions = Object.keys(boolOptions);
-        this.cache = new Map();
+        this.optionCache = new Map();
+        this.botToGuildCache = new Map();
     }
 
     public async createProfile(guildID: string) {
         const botProfile = new botProfileModel({
             guildID,
             botID: '',
-            authentication: '',
+            authorization: '',
             roleRewardID: '',
             upvoteMessageChannelID: '',
-            pointName: '',
+            pointName: 'Points',
             allowedRoles: [],
             boolOptions: {
                 active: false,
@@ -50,8 +45,8 @@ class BotProfileManagerClass {
     public async getProfile(guildID: string) {
         let botProfile: Document | undefined | null;
 
-        if (this.cache.has(guildID)) {
-            botProfile = this.cache.get(guildID);
+        if (this.optionCache.has(guildID)) {
+            botProfile = this.optionCache.get(guildID);
         } else {
             botProfile = await botProfileModel.findOne({guildID});
         }
@@ -59,10 +54,21 @@ class BotProfileManagerClass {
         if (!botProfile) {
             throw new Error('No profile found for guildID');
         } else {
-            this.cache.set(guildID, botProfile);
+            this.optionCache.set(guildID, botProfile);
+            this.botToGuildCache.set(botProfile.get('botID'), guildID);
         }
 
         return botProfile;
+    }
+
+    public async getProfileThroughBotID(botID: string) {
+        const guildID = this.botToGuildCache.get(botID);
+
+        if (!guildID) {
+            throw new Error('No guildID entry for botID ' + botID + 'in botToGuildCache');
+        }
+
+        return await this.getProfile(guildID);
     }
 
     public async setValue(value: string, input: string | string[], guildID: string) {
@@ -72,7 +78,8 @@ class BotProfileManagerClass {
         botProfile.set(value, input);
         botProfile.save()
             .then(() => {
-                this.cache.set(guildID, botProfile);
+                this.optionCache.set(guildID, botProfile);
+                this.botToGuildCache.set(botProfile.get('botID'), guildID);
                 saved = true;
             })
             .catch((e) => {
@@ -92,7 +99,8 @@ class BotProfileManagerClass {
         botProfile.set('boolOptions', settings);
         botProfile.save()
             .then(() => {
-                this.cache.set(guildID, botProfile);
+                this.optionCache.set(guildID, botProfile);
+                this.botToGuildCache.set(botProfile.get('botID'), guildID);
                 saved = true;
             })
             .catch((e) => {
