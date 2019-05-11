@@ -1,5 +1,5 @@
 import { PointsModel, botProfileModel, ReminderModel } from '../../other';
-import { bot, Points, Reminder, BotProfileManager, /*Upvote*/ } from '../';
+import { bot, Points, Reminder, BotProfileManager, Upvote } from '../';
 import { MoustacheCommand } from './';
 import { inspect } from 'util';
 
@@ -10,7 +10,7 @@ export const evalCmd: MoustacheCommand = {
             const modules = {
                 bot,
                 points: Points,
-                // upvote: Upvote,
+                upvote: Upvote,
                 reminder: Reminder,
                 botprofman: BotProfileManager,
                 pointsmod: PointsModel,

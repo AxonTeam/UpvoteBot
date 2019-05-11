@@ -21,27 +21,33 @@ class UpvoteClass {
 
         const upvoter: Member | undefined = guild!.members.find((u: any) => u.id === req.body.user);
 
-        if (!upvoter) {
-            if (upvoteMessageChannelID) {
+        if (upvoteMessageChannelID) {
+            if (req.body.type === 'test') {
+                return bot.createMessage(upvoteMessageChannelID, `This is a test!${roleRewardID ? ' The upvoter should have gotten a role reward.' : ''}`);
+            }
+
+            if (!upvoter) {
                 bot.createMessage(upvoteMessageChannelID, `Someone upvoted on DBL! But they aren't on the server to recieve their perks...`);
-            }
-        } else {
-            if (roleRewardID) {
-                upvoter.addRole(roleRewardID, 'Upvote on DBL');
-            }
-
-            const reminder = await this.setReminder(upvoter);
-
-            if (reminder) {
-                this.sendUpvoteMessage(upvoter, req.body.isWeekend, botProfile, upvoteMessageChannelID);
             } else {
-                console.log('[upvote] Already has a reminder set.');
-                return;
+                if (roleRewardID) {
+                    upvoter.addRole(roleRewardID, 'Upvote on DBL');
+                }
+
+                const reminder = await this.setReminder(upvoter, botProfile);
+
+                if (reminder) {
+                    this.sendUpvoteMessage(upvoter, req.body.isWeekend, botProfile, upvoteMessageChannelID);
+                } else {
+                    console.log('[upvote] Already has a reminder set.');
+                    return;
+                }
             }
         }
+
     }
 
-    public async setReminder(upvoter: Member, manual: boolean) {
+    public async setReminder(upvoter: Member, botProfile: Document) {
+        const botID = botProfile.get('botID');
         const upvoteReminder = async () => {
             try {
                 const channel = await upvoter.user.getDMChannel();
@@ -51,28 +57,23 @@ class UpvoteClass {
                             name: 'Hello!',
                             icon_url: 'https://i.imgur.com/ta5wKEp.png',
                         },
-                        description: '[You can upvote Ease again.](https://discordbots.org/bot/365879035496235008/vote)',
-                        color: config.embedColor,
+                        description: `You can upvote <@}${botID}> again.\n\n[Vote](https://discordbots.org/bot/${botID}/vote)`,
                         footer: {
-                            text: 'This reminder was set automatically after you upvoted Ease 12h ago.'
+                            text: 'This reminder was set automatically after you game that bot an upvote 12h ago.'
                         }
                     },
                 };
 
-                if (manual) {
-                    embed.embed.footer.text = 'This reminder was set manually by yourself or a ruler.'
-                }
                 return channel.createMessage(embed);
-            }
-            catch (e) {
+            } catch (e) {
                 console.log(e);
             }
         };
 
-        return await Reminder.add(`upvote:${upvoter.id}`, 43200000, upvoteReminder, upvoter.id);
+        return await Reminder.add(`upvote:${upvoter.id}:${botID}`, 43200000, upvoteReminder, upvoter.id);
     }
 
-    private async sendUpvoteMessage(upvoter: Member, botProfile: Document, isWeekend: boolean, upvoteMessageChannelID: string) {
+    private async sendUpvoteMessage(upvoter: Member, isWeekend: boolean, botProfile: Document, upvoteMessageChannelID: string) {
         const pointProfile = await Points.find(upvoter.id, botProfile.get('guildID'));
         let msg: string;
 

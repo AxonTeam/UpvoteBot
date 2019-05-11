@@ -26,7 +26,7 @@ class ReminderClass {
      * @param {number} delay The amount of time to wait until execute gets triggered (in ms)
      * @param {() => void} execute Function to execute after the delay
      * @param {string} [userID] Associate a userID to the reminder (Optional)
-     * @returns {Promise<boolean>} True if successfully added, false if there is already a reminder with the same ID.
+     * @returns {Promise<boolean>} True if successfully added, false if there already is a reminder with the same ID or associated userID is opted out.
      * @memberof ReminderClass
      */
     public async add(id: string, delay: number, execute: () => void, userID?: string): Promise<boolean> {
@@ -62,7 +62,7 @@ class ReminderClass {
      * Manually remove a reminder.
      *
      * @param {string} id ID of the reminder
-     * @returns {Promise<boolean | null>} True if successfully removed, null if the reminder wasn't found 
+     * @returns {Promise<boolean | null>} True if successfully removed, null if the reminder wasn't found
      * @memberof ReminderClass
      */
     public async remove(id: string): Promise<boolean | null> {

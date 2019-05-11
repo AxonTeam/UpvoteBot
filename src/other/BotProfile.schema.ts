@@ -6,7 +6,7 @@ export const boolOptions = {
     active: Boolean,
     roleReward: Boolean,
     upvoteMessage: Boolean,
-}
+};
 
 export const botProfileOptions = {
     guildID: String, // Associated Guild
