@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import { app, bot } from './Modules/';
-import { Guild, Role } from 'eris';
+import { app } from './Modules/';
 const port: number = 3001;
 
 console.log('--------------------\nStarting UpvoteBot\n--------------------');
@@ -14,16 +13,4 @@ mongoose.connect('mongodb://localhost:27017/upvoteBotDB', {
 
 app.listen(port, () => {
     console.log(`[express] Listening at port ${port}`);
-});
-
-bot.on('guildCreate', (guild: Guild) => {
-
-});
-
-bot.on('guildDelete', (guild: Guild) => {
-
-});
-
-bot.on('guildRoleDelete', (guild: Guild, role: Role) => {
-
 });

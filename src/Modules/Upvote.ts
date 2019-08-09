@@ -59,7 +59,7 @@ class UpvoteClass {
                         },
                         description: `You can upvote <@}${botID}> again.\n\n[Vote](https://discordbots.org/bot/${botID}/vote)`,
                         footer: {
-                            text: 'This reminder was set automatically after you game that bot an upvote 12h ago.'
+                            text: 'This reminder was set automatically after you upvoted that bot 12 hours ago.'
                         }
                     },
                 };

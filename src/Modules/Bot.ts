@@ -1,4 +1,4 @@
-import { CommandClient, Guild } from 'eris';
+import { CommandClient, Guild, Role, PrivateChannel } from 'eris';
 import { commands } from './Commands';
 import { config } from '../config';
 
@@ -33,6 +33,14 @@ bot.on('guildCreate', async (guild: Guild) => {
 
 bot.on('error', (e: Error) => {
     console.log(e);
+});
+
+bot.on('guildDelete', (guild: Guild) => {
+    
+});
+
+bot.on('guildRoleDelete', (guild: Guild, role: Role) => {
+
 });
 
 commands.forEach((element) => {
