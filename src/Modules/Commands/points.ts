@@ -2,38 +2,6 @@ import { MoustacheCommand } from './';
 import { bot, Points } from '../';
 import { PointsModel } from '../../other/';
 
-const subPointsChange: MoustacheCommand = {
-    execute: async (msg, args) => {
-        const [ userID, guildID, amount ] = args;
-        let userPoints;
-
-        if (!userID || !amount) {
-            return 'Not enough arguments.';
-        } else if (!+amount) {
-            return 'Amount is not a number.';
-        }
-
-        userPoints = await Points.change(userID, guildID, +amount, false);
-
-        if (userPoints === false) {
-            return 'This action would result in negative points and has been aborted.';
-        } else if (userPoints === null) {
-            return 'Something went wrong. Make sure you used the right userID and guildID.';
-        }
-
-        return `<@${userID}>'s points are now at ${userPoints}.`;
-    },
-    label: 'pointsChange',
-    options: {
-        description: 'Changes points by given amount.',
-        fullDescription: 'Increments or decrements the points of the given user by given amount.',
-        usage: '`userID` `amount`',
-        requirements: {
-            roleIDs: ['378293035852890124'],
-        }
-    }
-};
-
 export const points: MoustacheCommand = {
     execute: async (msg, args) => {
         const guild = bot.guilds.get((msg as any).channel.guild);
