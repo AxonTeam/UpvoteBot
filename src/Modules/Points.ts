@@ -1,71 +1,33 @@
 import { PointsModel } from '../other/';
+import { Document } from 'mongoose';
 
+// Should take a look again
 class PointsClass {
 
-    /**
-     * Searches DB for points assigned by the userID
-     *
-     * @param {string} userID
-     * @returns Points Document, or null if not found
-     * @memberof Points
-     */
-    public async find(userID: string) {
-        const userPoints = await PointsModel.findOne({ userID: userID });
+    public async find(userID: string, guildID: string) {
+        const userPoints = await PointsModel.findOne({ userID, guildID });
 
         if (userPoints) {
             return userPoints;
         } else {
-            return null;
+            return await this.create(userID, guildID);
         }
     }
 
-    /**
-     * Changes the documents points by given amount
-     *
-     * @param {Document} userPoints
-     * @param {string} guildID
-     * @param {number} amount Amount of points to add/remove
-     * @param {boolean} force Force Points to change even if they will turn negative
-     * @returns Saved Points Document if successful/forced, false if change would result in negative points, null if something went wrong
-     * @memberof Points
-     */
-    public async change(userPoints: any, guildID: string, amount: number, force: boolean) {
-        const guildPoints = userPoints.guilds.get(guildID);
-        let saved;
+    public async change(userPoints: Document, amount: number) {
+        const guildPoints = userPoints.get('points', Number);
 
-        if ((guildPoints + amount) < 0) {
-            if (force) {
-                userPoints.guilds.set(guildPoints + amount);
-            } else {
-                return false;
-            }
-        } else {
-            userPoints.guilds.set(guildPoints + amount);
-        }
+        userPoints.set('points', guildPoints + amount);
 
-        try {
-            saved = await userPoints.save()
-        } catch (err) {
-            console.log(err);
-            saved = null;
-        }
-
-        return saved;
+        return await userPoints.save()
+            .catch((e) => console.log(e));
     }
 
-    /**
-     * Creates a new Points Document for given userID
-     *
-     * @private
-     * @param {string} userID
-     * @param {string} guildID guildID that should be added
-     * @returns {Document} Points Document
-     * @memberof Points
-     */
     private async create(userID: string, guildID: string) {
         const userPoints = new PointsModel({
-            userID: userID,
-            guilds: new Map([[guildID, 0]])
+            userID,
+            guildID,
+            points: 0
         });
 
         return await userPoints.save();

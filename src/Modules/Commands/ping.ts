@@ -21,5 +21,4 @@ export const ping: MoustacheCommand = {
         fullDescription: 'It\'s actually a secret eval command that everyone can use.\n*Just kidding.*',
         usage: ''
     }
-}
-
+};

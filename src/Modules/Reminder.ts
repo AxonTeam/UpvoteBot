@@ -1,63 +1,22 @@
-import { Message } from "eris";
-import { ReminderModel } from "../other";
+import { Message } from 'eris';
 
 export interface MoustacheReminder {
     id: string;
     userID?: string;
-    triggerTime: number;
     timeout: any; // Actually Timeout, but that type doesn't seem to exist...
     execute: (msg?: Message, args?: string[]) => void;
 }
 
 /**
- * Handles reminders.
+ * Handles reminders. Would be much more useful if #9 didn't exist.
  *
  * @class ReminderClass
  */
 class ReminderClass {
     private reminderCache: Map<string, MoustacheReminder>;
-    private ignoredCache: Map<string, null>
 
     constructor() {
         this.reminderCache = new Map();
-        this.ignoredCache = new Map();
-
-        this.init()
-            .catch(e => console.log(e));
-    }
-
-    /**
-     * Initialises the reminder cache by looking for an already saved cache and setting all stored timeouts again.
-     *
-     * @private
-     * @returns {Promise<void>}
-     * @memberof ReminderClass
-     */
-    private async init(): Promise<void> {
-        const savedCache = await ReminderModel.findOne({ version: 1 });
-        const currentTime = new Date().getMilliseconds();
-
-        if (!savedCache) {
-            return console.log('[reminder] No saved reminder cache found!');
-        } else {
-            this.reminderCache = (savedCache as any).cache;
-            this.ignoredCache = (savedCache as any).ignored;
-        }
-
-        this.reminderCache.forEach((value) => {
-            const delay = value.triggerTime - currentTime;
-            const timeout = setTimeout(async () => {
-                value.execute();
-
-                await this.removeAfterTimeout(value.id);
-            }, delay);
-
-            value.timeout = timeout;
-
-            console.log(`[reminder] Set cached reminder ${value.id}`);
-        });
-
-        return console.log('[reminder] All cached reminders are set again.');
     }
 
     /**
@@ -76,33 +35,24 @@ class ReminderClass {
             return false;
         }
 
-        if (userID && this.ignored(userID)) {
-            return false;
-        }
-
-        const currentTime: number = new Date().getMilliseconds();
-
         // setTimeout using execute and delay
         const timeout = setTimeout(async () => {
+            console.log('[reminder] Executing reminder ' + id);
             execute();
 
-            await this.removeAfterTimeout(id);
+            this.reminderCache.delete(id);
         }, delay);
 
         // construct the reminder object
         const reminder: MoustacheReminder = {
-            id: id,
-            userID: userID,
-            triggerTime: currentTime + delay,
-            timeout: timeout,
-            execute: execute
+            id,
+            userID,
+            timeout,
+            execute
         };
 
         // add reminder to this.reminderCache
         this.reminderCache.set(id, reminder);
-
-        // update DB
-        await this.save();
 
         console.log(`[reminder] Set reminder ${id}`);
         return true;
@@ -112,7 +62,7 @@ class ReminderClass {
      * Manually remove a reminder.
      *
      * @param {string} id ID of the reminder
-     * @returns {Promise<boolean | null>} True if successfully removed, null if the reminder wasn't found 
+     * @returns {Promise<boolean | null>} True if successfully removed, null if the reminder wasn't found
      * @memberof ReminderClass
      */
     public async remove(id: string): Promise<boolean | null> {
@@ -126,25 +76,7 @@ class ReminderClass {
 
         this.reminderCache.delete(id);
 
-        await this.save();
-        
         return true;
-    }
-
-    /**
-     * Called by a reminder to remove itself from the cache.
-     *
-     * @private
-     * @param {string} id ID of the reminder
-     * @memberof ReminderClass
-     */
-    private async removeAfterTimeout(id: string) {
-        // Interval was already cleared at this point
-        // delete from cache
-        this.reminderCache.delete(id);
-
-        // update DB
-        await this.save();
     }
 
     /**
@@ -160,87 +92,6 @@ class ReminderClass {
             }
         });
     }
-
-    /**
-     * Save the cache to the DB.
-     *
-     * @private
-     * @memberof ReminderClass
-     */
-    private async save() {
-        const cache = await ReminderModel.findOne({ version: 1 });
-
-        if (!cache) {
-            return new Error('Couldn\'t save cache to DB!');
-        }
-
-        (cache as any).cache = this.reminderCache;
-        (cache as any).ignored = this.ignoredCache;
-
-        cache.markModified('cache');
-        cache.markModified('ignored');
-
-        try {
-            await cache.save();
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
-    /**
-     * Check if the given userID opted out of reminders.
-     *
-     * @param {string} userID
-     * @returns {boolean} True if they did, false if not
-     * @memberof ReminderClass
-     */
-    public ignored(userID: string): boolean {
-        return this.ignoredCache.has(userID);
-    }
-
-    /**
-     * Add the given userID to the opted out list.
-     *
-     * @param {string} userID
-     * @returns {Promise<boolean>} True if successful, false if already opted out
-     * @memberof ReminderClass
-     */
-    public async optout(userID: string): Promise<boolean> {
-        if (this.ignored(userID)) {
-            return false;
-        }
-
-        this.ignoredCache.set(userID, null);
-        await this.removeAll(userID);
-
-        return true;
-    }
-
-    /**
-     * Remove the given userID from the opted out list.
-     *
-     * @param {string} userID
-     * @returns {Promise<boolean>} True if successfull, false if not opted out
-     * @memberof ReminderClass
-     */
-    public async optin(userID: string): Promise<boolean> {
-        if (!this.ignored(userID)) {
-            return false;
-        }
-
-        this.ignoredCache.delete(userID);
-        await this.save();
-
-        return true;
-    }
 }
 
 export const Reminder = new ReminderClass();
-
-/* Commands TBA:
-    - reminder optout (also deletes all set reminders)
-    - reminder optin
-    - Updated reminder add
-    - Updated reminder upvote
-    - reminder remove
-*/

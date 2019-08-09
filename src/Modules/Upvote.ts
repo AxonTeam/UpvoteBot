@@ -1,41 +1,53 @@
 import { Member } from 'eris';
 import { Request } from 'express';
-import { bot, Reminder, getSuperb } from './';
+import { bot, Reminder, getSuperb, Points } from './';
+import { Document } from 'mongoose';
 
 /**
  * Handles everything related to upvotes.
  *
  * @class UpvoteClass
  */
-/*
+
 class UpvoteClass {
+    public async handle(req: Request, botProfile: Document) {
+        const guild = bot.guilds.get(botProfile.get('guildID'));
+        const upvoteMessageChannelID = botProfile.get('upvoteMessageChannelID');
+        const roleRewardID = botProfile.get('roleRewardID');
 
-    public async handle(req: Request) {
-        console.log(`[upvote] Upvote recieved! Searching for ${req.body.user}...`);
+        if (!guild) {
+            return;
+        }
 
-        const ease = bot.guilds.get('365236789855649814');
-        const upvoter: Member | undefined = ease!.members.find((u: any) => u.id === req.body.user);
+        const upvoter: Member | undefined = guild!.members.find((u: any) => u.id === req.body.user);
 
-        if (!upvoter) {
-            // The upvoter is not on the server
-            console.log(`[upvote] ${req.body.user} not found.`);
-            bot.createMessage(config.upvoterChannel, `Someone upvoted on DBL! But they aren't on the server to recieve their perks...`);
-        } else {
-            // The upvoter is on the server
-            upvoter.addRole(config.upvoterRole, 'Upvote on DBL');
+        if (upvoteMessageChannelID) {
+            if (req.body.type === 'test') {
+                return bot.createMessage(upvoteMessageChannelID, `This is a test!${roleRewardID ? ' The upvoter should have gotten a role reward.' : ''}`);
+            }
 
-            const reminder = await this.setReminder(upvoter, false);
-
-            if (reminder) {
-                this.sendUpvoteMessage(upvoter, req.body.isWeekend);
+            if (!upvoter) {
+                bot.createMessage(upvoteMessageChannelID, `Someone upvoted on DBL! But they aren't on the server to recieve their perks...`);
             } else {
-                console.log('[upvote] Already has a reminder set.')
-                return;
+                if (roleRewardID) {
+                    upvoter.addRole(roleRewardID, 'Upvote on DBL');
+                }
+
+                const reminder = await this.setReminder(upvoter, botProfile);
+
+                if (reminder) {
+                    this.sendUpvoteMessage(upvoter, req.body.isWeekend, botProfile, upvoteMessageChannelID);
+                } else {
+                    console.log('[upvote] Already has a reminder set.');
+                    return;
+                }
             }
         }
+
     }
 
-    public async setReminder(upvoter: Member, manual: boolean) {
+    public async setReminder(upvoter: Member, botProfile: Document) {
+        const botID = botProfile.get('botID');
         const upvoteReminder = async () => {
             try {
                 const channel = await upvoter.user.getDMChannel();
@@ -45,42 +57,36 @@ class UpvoteClass {
                             name: 'Hello!',
                             icon_url: 'https://i.imgur.com/ta5wKEp.png',
                         },
-                        description: '[You can upvote Ease again.](https://discordbots.org/bot/365879035496235008/vote)',
-                        color: config.embedColor,
+                        description: `You can upvote <@}${botID}> again.\n\n[Vote](https://discordbots.org/bot/${botID}/vote)`,
                         footer: {
-                            text: 'This reminder was set automatically after you upvoted Ease 12h ago.'
+                            text: 'This reminder was set automatically after you upvoted that bot 12 hours ago.'
                         }
                     },
                 };
 
-                if (manual) {
-                    embed.embed.footer.text = 'This reminder was set manually by yourself or a ruler.'
-                }
                 return channel.createMessage(embed);
-            }
-            catch (e) {
+            } catch (e) {
                 console.log(e);
             }
         };
 
-        return await Reminder.add(`upvote:${upvoter.id}`, 43200000, upvoteReminder, upvoter.id);
+        return await Reminder.add(`upvote:${upvoter.id}:${botID}`, 43200000, upvoteReminder, upvoter.id);
     }
 
-    private async sendUpvoteMessage(upvoter: Member, isWeekend: boolean) {
-        let msg: string = '';
+    private async sendUpvoteMessage(upvoter: Member, isWeekend: boolean, botProfile: Document, upvoteMessageChannelID: string) {
+        const pointProfile = await Points.find(upvoter.id, botProfile.get('guildID'));
+        let msg: string;
 
         if (isWeekend) {
-               const points = await Transactions.add(upvoter.id, 2, 'Upvote on DBL (Voting Multiplier).');
-                msg = `${getSuperb()}, <@${upvoter.id}> has upvoted on DBL during an active voting multiplier! Points: ${points}`;
-            } else {
-                const points = await Transactions.add(upvoter.id, 1, 'Upvote on DBL.');
-                msg = `${getSuperb()}, <@${upvoter.id}> has upvoted on DBL! Points: ${points}`;
-            }
+            const points = await Points.change(pointProfile, 2);
+            msg = `${getSuperb()}, <@${upvoter.id}> upvoted <@${botProfile.get('botID')}> on DBL during an active voting multiplier! ${botProfile.get('pointName')} ${points}`;
+        } else {
+            const points = await Points.change(pointProfile, 1);
+            msg = `${getSuperb()}, <@${upvoter.id}> upvoted <@${botProfile.get('botID')}> on DBL! ${botProfile.get('pointName')}: ${points}`;
+        }
 
-        console.log('[upvote] Sending message to #upvote-army.');
-        bot.createMessage(config.upvoterChannel, msg);
+        bot.createMessage(upvoteMessageChannelID, msg);
     }
 }
 
 export const Upvote = new UpvoteClass();
-*/

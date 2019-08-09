@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 
 const pointsSchema = new Schema({
     userID: String,
-    guilds: Map
+    guildID: String,
+    points: Number
 });
 
 export const PointsModel = mongoose.model('Points', pointsSchema);

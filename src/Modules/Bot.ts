@@ -1,4 +1,4 @@
-import { CommandClient, Guild } from 'eris';
+import { CommandClient, Guild, Role, PrivateChannel } from 'eris';
 import { commands } from './Commands';
 import { config } from '../config';
 
@@ -16,21 +16,31 @@ bot.once('ready', () => {
     console.log('[startup] Bot ready.');
 });
 
-bot.on('guildCreate', (guild: Guild) => {
-    const ownerChannel = guild.members.get(guild.ownerID);
+bot.on('guildCreate', async (guild: Guild) => {
+    const ownerChannel = await guild.members.get(guild.ownerID)!.user.getDMChannel();
 
     const embed = { embed: {
         title: '*Hey there!*',
-        description: 'We\'re glad you\'re interested in UpvoteBot! Before we get started you need to set up some stuff. Visit [UpvoteBot\'s website](google.com) for a guide.'
-    }}
+        description: 'We\'re glad you\'re interested in UpvoteBot! Before we get started you need to set up some stuff. Visit [UpvoteBot\'s documentation](google.com) for a guide.'
+    }};
 
     if (!ownerChannel) {
         return;
+    } else {
+        ownerChannel.createMessage(embed);
     }
-})
+});
 
 bot.on('error', (e: Error) => {
     console.log(e);
+});
+
+bot.on('guildDelete', (guild: Guild) => {
+    
+});
+
+bot.on('guildRoleDelete', (guild: Guild, role: Role) => {
+
 });
 
 commands.forEach((element) => {
@@ -41,6 +51,6 @@ commands.forEach((element) => {
         element.subcommands.forEach((subcommand) => {
             command.registerSubcommand(subcommand.label, subcommand.execute, subcommand.options);
             console.log(`[startup] Subcommand registered: ${element.label} ${subcommand.label}`);
-        })
+        });
     }
 });
