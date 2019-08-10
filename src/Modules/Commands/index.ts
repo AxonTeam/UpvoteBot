@@ -1,15 +1,16 @@
 import { evalCmd } from './eval';
 import { leaderboard } from './leaderboard';
-import { points } from './points';
 import { ping } from './ping';
-
+import { points } from './points';
+import { setting } from './setting';
 import { Message, CommandOptions } from 'eris';
 
 export const commands: MoustacheCommand[] = [
     evalCmd,
     leaderboard,
     points,
-    ping
+    ping,
+    setting
 ];
 
 export interface MoustacheCommand {

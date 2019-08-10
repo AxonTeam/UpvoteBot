@@ -2,7 +2,7 @@ import { BotProfileManager } from '..';
 import { MoustacheCommand } from '.';
 import { TextChannel } from 'eris';
 
-const settingDescription = 'The setting commands are built like a CLI.\\\
+const settingDescription = 'The setting command is built like a CLI.\\\
 \nUsage: e!setting [--change] {--value | --boolean} option [input if --value]\\\
 \n-c, -v, and -b are shorthands for --change, --value and --boolean. input is only required when changing a value.\\\
 \n\nValue settings require a string as input.\\\
@@ -15,7 +15,7 @@ const settingDescription = 'The setting commands are built like a CLI.\\\
 \n`removeAllowedRole` - Removes a role from the allowed list again.\\\
 \n\nBoolean options can only be either true or false (false by default). They will be changed to the opposite when you use --change.\\\
 \n`active` - Whether the bot should track upvotes or not.\\\
-\n`roleReward` - If a role should be given to upvoters.\\\
+\n`roleReward` - If a role should be given to upvoters. (Requires roleRewardID)\\\
 \n`upvoteMessage` - If the bot should send upvote messages.';
 
 const changeSetting: MoustacheCommand = {
@@ -111,7 +111,7 @@ const changeSetting: MoustacheCommand = {
                 return 'You\'re not allowed to change settings.';
             }
 
-            const saved = BotProfileManager.setSetting(option, !currentOption, guildID);
+            const saved = BotProfileManager.setBool(option, !currentOption, guildID);
 
             if (saved) {
                 return `**${option}** has been set to **${!currentOption}**.`;
@@ -179,7 +179,7 @@ export const setting: MoustacheCommand = {
         usage: '',
         aliases: ['s']
     }
-}
+};
 
 // Determing wether a value or a setting is getting changed
 function determValueMode(arg: string) {

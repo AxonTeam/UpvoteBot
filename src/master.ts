@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 import { app } from './Modules/';
-const port: number = 3001;
+const port: number = 3003;
 
 console.log('--------------------\nStarting UpvoteBot\n--------------------');
 
-mongoose.connect('mongodb://localhost:27017/upvoteBotDB', {
+mongoose.connect('mongodb://localhost:27017/upvoteDB', {
     useNewUrlParser: true,
     autoReconnect: true
 })
