@@ -101,6 +101,12 @@ export const superb: string[] = [
     'world-classish',
 ];
 
+/**
+ * Gets a random superb word when called
+ *
+ * @export
+ * @returns {string}
+ */
 export function getSuperb(): string {
     const item: string = superb[Math.floor(Math.random() * superb.length)];
     return item.charAt(0).toUpperCase() + item.slice(1);

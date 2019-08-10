@@ -8,7 +8,7 @@ export interface MoustacheReminder {
 }
 
 /**
- * Handles reminders. Would be much more useful if #9 didn't exist.
+ * Handles reminders.
  *
  * @class ReminderClass
  */

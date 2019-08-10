@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
-import { Document } from 'mongoose';
 import bodyParser from 'body-parser';
-import { BotProfileManager } from './';
+import { BotProfileManager, Upvote } from './';
 
 export const app = express();
 app.use(bodyParser.json());
@@ -12,6 +11,6 @@ app.post('/upvote/:botID', async (req: Request, res: Response) => {
     if (!botProfile) {
         return;
     } else if (!botProfile.get('active') || req.body.authentication !== botProfile.get('authentication')) {
-        // await Upvote.handle(req, botProfile);
+        await Upvote.handle(req, botProfile);
     }
 });

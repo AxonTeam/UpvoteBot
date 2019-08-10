@@ -29,6 +29,5 @@ export const points: MoustacheCommand = {
         description: 'Shows how many points a user currently has.',
         fullDescription: 'Shows how many points a user currently has.',
         usage: '`userID`'
-    }// ,
-    // subcommands: [subPointsChange] Should not be used since points should not be changed
+    }
 };

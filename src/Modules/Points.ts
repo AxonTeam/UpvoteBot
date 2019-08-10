@@ -4,6 +4,14 @@ import { Document } from 'mongoose';
 // Should take a look again
 class PointsClass {
 
+    /**
+     * Gets the points of a user in a guild, creates a new point document if none exists
+     *
+     * @param {string} userID
+     * @param {string} guildID
+     * @returns {Document} Points Document
+     * @memberof PointsClass
+     */
     public async find(userID: string, guildID: string) {
         const userPoints = await PointsModel.findOne({ userID, guildID });
 
@@ -14,6 +22,14 @@ class PointsClass {
         }
     }
 
+    /**
+     * Changes the points in userPoints by amount
+     *
+     * @param {Document} userPoints
+     * @param {number} amount
+     * @returns {Document} Updated document
+     * @memberof PointsClass
+     */
     public async change(userPoints: Document, amount: number) {
         const guildPoints = userPoints.get('points', Number);
 
@@ -23,6 +39,15 @@ class PointsClass {
             .catch((e) => console.log(e));
     }
 
+    /**
+     * Creates a new document for points
+     *
+     * @private
+     * @param {string} userID
+     * @param {string} guildID
+     * @returns New document
+     * @memberof PointsClass
+     */
     private async create(userID: string, guildID: string) {
         const userPoints = new PointsModel({
             userID,
