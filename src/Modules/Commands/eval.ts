@@ -17,6 +17,7 @@ export const evalCmd: MoustacheCommand = {
                 botprofmod: botProfileModel,
             };
 
+            // tslint:disable-next-line: no-eval
             let evaled = await eval(args.join(' '));
 
             if (typeof evaled === 'object') {

@@ -96,12 +96,13 @@ const changeSetting: MoustacheCommand = {
         } else {
             const botProfile = await BotProfileManager.getProfile(guildID);
             const validOption = BotProfileManager.booleanOptions.includes(option);
-            const currentOption: boolean = botProfile.get('boolOptions')[option];
 
             if (!botProfile) {
                 console.log('BotProfile not found? GuildID: ' + guildID);
                 return 'BotProfile not found, shouldn\'t this be impossible?';
             }
+
+            const currentOption: boolean = botProfile.get('boolOptions')[option];
 
             if (!validOption) {
                 return `Invalid usage, **${option}** is not a valid option.`;

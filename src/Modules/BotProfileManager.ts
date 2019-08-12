@@ -58,7 +58,7 @@ class BotProfileManagerClass {
      * @memberof BotProfileManagerClass
      */
     public async getProfile(guildID: string) {
-        let botProfile: Document | undefined | null;
+        let botProfile;
 
         if (this.profileCache.has(guildID)) {
             botProfile = this.profileCache.get(guildID);
@@ -113,7 +113,7 @@ class BotProfileManagerClass {
                 this.botToGuildCache.set(botProfile.get('botID'), guildID);
                 saved = true;
             })
-            .catch((e) => {
+            .catch((e: any) => {
                 console.log(`Failure saving botProfile:\n### value: ${value}, input: ${input}, guildID: ${guildID}`);
                 console.log(e);
                 saved = false;
@@ -143,7 +143,7 @@ class BotProfileManagerClass {
                 this.botToGuildCache.set(botProfile.get('botID'), guildID);
                 saved = true;
             })
-            .catch((e) => {
+            .catch((e: any) => {
                 console.log(`Failure saving botProfile:\n### setting: ${setting}, input: ${input}, guildID: ${guildID}`);
                 console.log(e);
                 saved = false;
